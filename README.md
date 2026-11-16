@@ -1,17 +1,15 @@
-# Gigabyte GAMING A16 Fn keys on Linux
+# Gigabyte AERO X16 Fn keys on Linux
 
-[Português (Brasil)](README.pt-BR.md)
-
-HID-BPF driver that fixes the Fn keys of the **Gigabyte GAMING A16** internal keyboard
-(USB `0414:8105`, "GIGABYTE USB-HID Keyboard").
+HID-BPF driver that fixes the Fn keys of the **Gigabyte AERO X16-2WH** internal keyboard
+(USB `0414:8104`, "GIGABYTE USB-HID Keyboard").
 
 **The problem:** on Linux the keyboard sends `F20` whenever **Fn** is pressed. KDE, GNOME and X11
 treat F20 as *Microphone Mute*, so Fn alone, or any Fn combo, mutes the microphone. On Windows this
 is handled by the Gigabyte Control Center, which does not exist for Linux.
-Problem report: [Fedora Discussion](https://discussion.fedoraproject.org/t/the-fn-key-isnt-working-properly-fedora-44-workstation-gigabyte-gaming-a16-3wh/199094).
+Original upstream Problem report: [Fedora Discussion](https://discussion.fedoraproject.org/t/the-fn-key-isnt-working-properly-fedora-44-workstation-gigabyte-gaming-a16-3wh/199094).
 
-> Tested on a GAMING A16 3VH, Bazzite (Fedora 44), kernel 7.2, KDE Plasma 6.7 (Wayland).
-> Other A16 models with the same keyboard (`0414:8105`) should work. If you try it, please open an issue with the result.
+> Tested on an AERO X16 2WH, CachyOS (Arch), kernel 7.3, KDE Plasma 6.8.3 (Wayland).
+> Other A16 models with the same keyboard (`0414:8104`) should work, but different ID's will NOT from my research. Go upstream if you need 8105 support for the A16
 
 ## What changes
 
@@ -57,9 +55,9 @@ Driver only, no shortcuts: `./install.sh --no-shortcuts`.
 
 **Uninstall:** `./uninstall.sh` (removes the driver, the script and the shortcuts it created).
 
-### Building it yourself (optional)
+### Building it yourself (required) (NOT shipping file in DIST to avoid me forgetting to update it :P)
 
-A prebuilt driver ships in `dist/`. To build: `./build.sh`. It uses the system `clang` and
+To build: `./build.sh`. It uses the system `clang` and
 `bpftool`, or builds inside a `podman` container if they are missing.
 `install.sh` prefers what is in `build/`. Run `install.sh` again after rebuilding.
 
