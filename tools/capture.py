@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guided capture of the raw HID reports of the Gigabyte A16 keyboard (0414:8105).
+"""Guided capture of the raw HID reports of the Gigabyte X16 keyboard (0414:8104).
 
 Reads all the keyboard hidraw interfaces at once and logs what arrives at each
 step. With sudo, it also logs the keys arriving on evdev.
@@ -15,7 +15,7 @@ import time
 
 from watch_keys import EV_KEY, EVENT, NAMES
 
-VID_PID = "00000414:00008105"
+VID_PID = "00000414:00008104"
 STEP_SECONDS = 5
 
 STEPS = [
@@ -74,7 +74,7 @@ def main():
     steps = sys.argv[2:] or STEPS
     nodes = find_nodes()
     if not nodes:
-        sys.exit("No 0414:8105 hidraw found")
+        sys.exit("No 0414:8104 hidraw found")
 
     fds = {}
     for name in nodes:
