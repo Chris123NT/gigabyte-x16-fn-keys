@@ -25,6 +25,7 @@ HID_BPF_CONFIG(
 #define KBD_ARRAY_END		8
 #define KBD_BITMAP_START	8
 
+#define USAGE_H         0x0b
 #define USAGE_P			0x13
 #define USAGE_KP_EQUAL		0x67
 #define USAGE_F13		0x68
@@ -33,6 +34,7 @@ HID_BPF_CONFIG(
 #define USAGE_F16		0x6b
 #define USAGE_F17		0x6c
 #define USAGE_F18		0x6d
+#define USAGE_F19       0x6e
 #define USAGE_FN		0x6f	/* F20 */
 #define USAGE_LEFT_META		0xe3
 #define USAGE_FIRST_MOD		0xe0
@@ -60,6 +62,12 @@ HID_BPF_CONFIG(
 #define EXTRA_F16		(1 << 2)
 #define EXTRA_F17		(1 << 3)
 #define EXTRA_F18		(1 << 4)
+
+/*Define debounce for Fn+F12 because the EC is double pressing within 170ms, do drop 2nd press for 300 ms */
+#define F19_DEBOUNCE_NS		300000000ULL	/* 300 ms */
+
+static __u64 last_f19_ns;
+static bool f19_down;
 
 static const __u8 extra_rdesc[] = {
 	0x05, 0x01,		/* Usage Page (Generic Desktop) */
@@ -110,13 +118,16 @@ static void clear_array(__u8 *data)
 		data[i] = 0x00;
 }
 
-static void fix_fn_macro(__u8 *data)
+static bool fix_fn_macro(__u8 *data)
 {
-	bool has_key = false, has_p = false, has_meta = false;
+	bool has_key = false, has_h = false, has_p = false;
+	bool has_meta = (data[0] & 0x08) != 0;
 	int i;
 
 	for (i = KBD_ARRAY_START; i < KBD_ARRAY_END; i++) {
-		if (data[i] == USAGE_P)
+		if (data[i] == USAGE_H)
+			has_h = true;
+		else if (data[i] == USAGE_P)
 			has_p = true;
 		else if (data[i] == USAGE_LEFT_META)
 			has_meta = true;
@@ -126,10 +137,24 @@ static void fix_fn_macro(__u8 *data)
 
 	if (!has_key) {
 		clear_array(data);
-	} else if (has_p && has_meta) {
+	} else if (has_meta && has_p) {
+		data[0] &= ~0x08;
 		clear_array(data);
 		data[KBD_ARRAY_START] = USAGE_F13;
+	} else if (has_meta && has_h) {
+		__u64 now = bpf_ktime_get_ns();
+
+		data[0] &= ~0x08;
+		clear_array(data);
+		if (f19_down || (now - last_f19_ns) >= F19_DEBOUNCE_NS) {
+			if (!f19_down)
+				last_f19_ns = now;
+			data[KBD_ARRAY_START] = USAGE_F19;
+			return true;
+		}
 	}
+
+	return false;
 }
 
 static int fix_keyboard_report(__u8 *data)
@@ -148,7 +173,9 @@ static int fix_keyboard_report(__u8 *data)
 	data[KBD_BITMAP_START + USAGE_FN / 8] &= ~(1 << (USAGE_FN % 8));
 
 	if (fn)
-		fix_fn_macro(data);
+		f19_down = fix_fn_macro(data);
+	else
+		f19_down = false;
 
 	return 0;
 }
