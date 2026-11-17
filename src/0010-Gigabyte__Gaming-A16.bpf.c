@@ -32,10 +32,19 @@ HID_BPF_CONFIG(
 #define USAGE_F15		0x6a
 #define USAGE_F16		0x6b
 #define USAGE_F17		0x6c
+#define USAGE_F18		0x6d
 #define USAGE_FN		0x6f	/* F20 */
 #define USAGE_LEFT_META		0xe3
 #define USAGE_FIRST_MOD		0xe0
 
+/*
+ * input2 (226 byte descriptor): mouse, consumer control, wireless radio
+ *   (report ID 7, Fn+F10) and a vendor collection (report ID 4, 4 bytes):
+ *     04 00 00 92  Fn+F4 (microphone mute)
+ *     04 00 00 84  Fn+F7 (fan)
+ *     04 00 00 93  Fn+G
+ *     04 01 20 00  Fn+Space
+ */
 #define MISC_RDESC_SIZE		226
 #define VENDOR_REPORT_ID	4
 #define VENDOR_REPORT_SIZE	4
@@ -50,6 +59,7 @@ HID_BPF_CONFIG(
 #define EXTRA_F14		(1 << 1)
 #define EXTRA_F16		(1 << 2)
 #define EXTRA_F17		(1 << 3)
+#define EXTRA_F18		(1 << 4)
 
 static const __u8 extra_rdesc[] = {
 	0x05, 0x01,		/* Usage Page (Generic Desktop) */
@@ -66,9 +76,10 @@ static const __u8 extra_rdesc[] = {
 	0x09, USAGE_F14,	/*  Usage (F14) */
 	0x09, USAGE_F16,	/*  Usage (F16) */
 	0x09, USAGE_F17,	/*  Usage (F17) */
-	0x95, 0x03,		/*  Report Count (3) */
-	0x81, 0x02,		/*  Input (Data,Var,Abs) */
+	0x09, USAGE_F18,	/*  Usage (F18) */
 	0x95, 0x04,		/*  Report Count (4) */
+	0x81, 0x02,		/*  Input (Data,Var,Abs) */
+	0x95, 0x03,		/*  Report Count (3) */
 	0x81, 0x03,		/*  Input (Cnst,Var,Abs) */
 	0xc0,			/* End Collection */
 };
@@ -155,6 +166,12 @@ static int send_extra_keys(struct hid_bpf_ctx *hctx, __u8 keys)
 
 static int fix_vendor_report(struct hid_bpf_ctx *hctx, __u8 *data)
 {
+    /* This is for the Fn+Space key combo, map to F18 so we can use it for whatever
+     * Can use to cycle KB backlight brightness like on Windows
+     */
+	if (data[1] == 0x01 && data[3] == 0x00)
+		return send_extra_keys(hctx, EXTRA_F18);
+
 	switch (data[3]) {
 	case VENDOR_FN_F4:
 		return send_extra_keys(hctx, EXTRA_MICMUTE);
