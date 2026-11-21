@@ -9,7 +9,7 @@ is handled by the Gigabyte Control Center, which does not exist for Linux.
 Original upstream Problem report: [Fedora Discussion](https://discussion.fedoraproject.org/t/the-fn-key-isnt-working-properly-fedora-44-workstation-gigabyte-gaming-a16-3wh/199094).
 
 > Tested on an AERO X16 2WH, CachyOS (Arch), kernel 7.3, KDE Plasma 6.8.3 (Wayland).
-> Other A16 models with the same keyboard (`0414:8104`) should work, but different ID's will NOT from my research. Go upstream if you need 8105 support for the A16
+> Other X16 models with the same keyboard (`0414:8104`) should work, but different ID's will NOT from my research. Go upstream if you need 8105 support for the A16
 
 ## What changes
 
@@ -39,8 +39,8 @@ There is no direct fan control on Linux for this model. Fn+F7 switches the power
 ## Install
 
 ```sh
-git clone https://github.com/gustavoguedess/gigabyte-a16-fn-keys.git
-cd gigabyte-a16-fn-keys
+git clone https://github.com/Chris123NT/gigabyte-x16-fn-keys.git
+cd gigabyte-x16-fn-keys
 ./install.sh
 ```
 
@@ -48,7 +48,7 @@ Run it **without sudo**: it asks for your password only to install the driver. I
 
 1. installs the driver to `/etc/udev-hid-bpf/` with a rule in `/etc/udev/rules.d/` (works on
    read-only `/usr` systems such as Bazzite and Silverblue) and loads it right away, no reboot needed;
-2. installs the airplane mode script to `~/.local/bin/a16-airplane-mode`;
+2. installs the airplane mode script to `~/.local/bin/x16-airplane-mode`;
 3. on KDE Plasma, sets the Fn+F7, Fn+F8 and Fn+F10 shortcuts. Shortcuts you already have are kept.
 
 Driver only, no shortcuts: `./install.sh --no-shortcuts`.
@@ -69,7 +69,7 @@ The driver works on any desktop; only the shortcuts are KDE-specific. The new ke
 |---|---|---|---|
 | Fn+F7 | `KEY_F17` | `XF86Launch8` | cycle power profile |
 | Fn+F8 | `KEY_F13` | `XF86Tools` | turn screen off |
-| Fn+F10 | `KEY_F14` | `XF86Launch5` | `~/.local/bin/a16-airplane-mode` |
+| Fn+F10 | `KEY_F14` | `XF86Launch5` | `~/.local/bin/x16-airplane-mode` |
 | G | `KEY_F15` | `XF86Launch6` | free |
 | Fn+G | `KEY_F16` | `XF86Launch7` | free |
 
@@ -79,7 +79,7 @@ System Settings; reassigning is fine.
 
 ## How it works
 
-The keyboard has 5 USB interfaces. The driver (`src/0010-Gigabyte__Gaming-A16.bpf.c`) acts on two:
+The keyboard has 5 USB interfaces. The driver (`src/0010-Gigabyte__Aero-X16.bpf.c`) acts on two:
 
 - **input0 (keyboard):** drops the F20 sent for Fn. The Windows shortcuts the firmware types while Fn
   is held (`Meta+P`, `Ctrl+Meta+F24`…) are delivered whole; Fn+F8's `Meta+P` becomes F13. G's `=` becomes F15.

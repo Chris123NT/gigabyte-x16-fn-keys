@@ -1,7 +1,7 @@
 #!/bin/sh
 # Builds the HID-BPF program. Uses the system clang + bpftool when available,
 # otherwise builds inside a container (podman), e.g. on Bazzite/Fedora Atomic.
-# Output: build/0010-Gigabyte__Gaming-A16.bpf.o
+# Output: build/0010-Gigabyte__Aero-X16.bpf.o
 set -eu
 cd "$(dirname "$0")"
 
